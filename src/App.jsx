@@ -25,7 +25,7 @@ export default function App() {
       const formData = new FormData();
       images.forEach((image) => formData.append("images", image)); // Backend expects "images"
 
-      const response = await axios.post("http://localhost:5300/upload", formData, {
+      const response = await axios.post("https://contact-extractor.onrender.com/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
