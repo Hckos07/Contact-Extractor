@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { Analytics } from "@vercel/analytics/react"
 
 export default function App() {
   const [images, setImages] = useState([]);
@@ -100,6 +101,7 @@ export default function App() {
           </div>
         )}
       </div>
+      <Analytics />
     </div>
   );
 }
