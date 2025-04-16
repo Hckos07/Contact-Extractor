@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
 
 export default function App() {
   const [images, setImages] = useState([]);
@@ -9,8 +9,14 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5300";
+
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files).slice(0, 50);
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length > 50) {
+      alert("⚠️ You can upload a maximum of 50 images.");
+    }
+    const files = selectedFiles.slice(0, 50);
     setImages(files);
     setPreviews(files.map((file) => URL.createObjectURL(file)));
   };
@@ -24,13 +30,15 @@ export default function App() {
 
     try {
       const formData = new FormData();
-      images.forEach((image) => formData.append("images", image)); // Backend expects "images"
+      images.forEach((image) => formData.append("images", image));
 
-      const response = await axios.post("https://contact-extractor.onrender.com/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const response = await axios.post(`${backendUrl}/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 1000 * 60 * 5, // 5 minutes
       });
 
-      // ✅ Backend already returns { name, number } pairs
       const receivedPairs = response.data;
 
       if (Array.isArray(receivedPairs)) {
@@ -40,6 +48,7 @@ export default function App() {
       }
     } catch (error) {
       console.error("Upload failed:", error);
+      alert("❌ Upload or processing failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -55,7 +64,9 @@ export default function App() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 to-indigo-600 p-6">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">Multi Image Contact Extractor</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+          Multi Image Contact Extractor
+        </h1>
 
         <label className="block w-full cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500 hover:bg-gray-100 transition">
           <input type="file" multiple className="hidden" onChange={handleImageChange} />
